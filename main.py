@@ -15,7 +15,7 @@ class App:
 
     # フレームの更新処理
     def update(self):
-        if pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):    # 上キーが押された場合
+        if pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):    # 上キーが押された場合
             self.map_y = self.map_y + 8 # マップY座標を加算してスクロール
 
 
