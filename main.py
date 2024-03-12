@@ -33,15 +33,15 @@ def draw_title_scene():  # タイトル画面描画関数
     pyxel.blt(26, 28, 0, 0, 48, 40, 16, 0)  # ロゴ描画
     pyxel.text(33, 45, "8X8Dot", 7)  # タイトル文字描画
     pyxel.text(43, 51, "Quest", 7)  # タイトル文字描画
-    pyxel.text(21, 74, "-PRESS SPACE -", (pyxel.frame_count % 8) + 1)  # スタート文字描画
+    pyxel.text(21, 74, "-PRESS SPACE-", (pyxel.frame_count % 8) + 1)  # スタート文字描画
 
 
 def draw_gameover_scene():  # ゲームオーバー画面描画
-    pyxel.text(55, 40, "GAME OVER", 7)
+    pyxel.text(55, 40, "GAME OVER", 7)  # ゲームオーバー文字描画
 
 
 class App:
-    def __init__(self):
+    def __init__(self):  # 初回1回のみ実行
         pyxel.init(96, 96, title="8X8DotQuest", fps=5)  # 画面サイズFPS設定
         pyxel.load("Quest.pyxres")  # PyxelEditorの読み込み
         self.scene = SCENE_TITLE  # 画面遷移の初期化
