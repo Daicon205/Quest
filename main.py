@@ -2,6 +2,7 @@ import pyxel
 
 SCENE_TITLE = 0  # タイトル画面
 SCENE_PLAY = 1  # ゲーム画面
+SCENE_GAMEOVER = 2  # ゲームオーバー画面
 
 
 class GameCharacter:  # キャラクタークラスの定義
@@ -35,16 +36,35 @@ def draw_title_scene():  # タイトル画面描画関数
     pyxel.text(21, 74, "-PRESS SPACE -", (pyxel.frame_count % 8) + 1)  # スタート文字描画
 
 
+def draw_gameover_scene():  # ゲームオーバー画面描画
+    pyxel.text(55, 40, "GAME OVER", 7)
+
+
 class App:
     def __init__(self):
         pyxel.init(96, 96, title="8X8DotQuest", fps=5)  # 画面サイズFPS設定
         pyxel.load("Quest.pyxres")  # PyxelEditorの読み込み
         self.scene = SCENE_TITLE  # 画面遷移の初期化
+        self.map_y = None  # マップY座標定義
+        self.tmr = None  # 時間を管理する変数定義
+        self.pl = None  # プレイヤーオブジェクト作成定義
+        self.emy1 = None  # モンスターオブジェクト作成(スライム：map1）定義
+        self.emy2 = None  # モンスターオブジェクト作成(スライム：map1）定義
+        self.emy_x = None  # 敵X座標リスト定義
+        self.emy_y = None  # 敵Y座標リスト定義
+        self.emy_hp = None  # 敵HPリスト定義
+        self.emy_atk = None  # 敵攻撃フラグリスト定義
+        self.emy_flg = None  # 敵出現フラグリスト定義
+        self.emy_dmg = None  # 敵ダメージ描画フラグリスト定義
+        self.init()  # 初期化関数実行
+        pyxel.run(self.update, self.draw)  # 更新処理、描画処理実行
 
+    def init(self):  # 初期化関数
+        self.map_y = -248  # マップY座標
+        self.tmr = 0  # 時間を管理する変数
         self.pl = Player(8, 48, 10, 10, True, False, 40, 3, 5)  # プレイヤーオブジェクト作成
         self.emy1 = Enemy(56, 272, 10, 1, True, False)  # モンスターオブジェクト作成(スライム：map1）
         self.emy2 = Enemy(72, 272, 10, 1, True, False)  # モンスターオブジェクト作成(スライム：map1）
-
         self.emy_x = [self.emy1.x, self.emy2.x]  # 敵X座標リスト
         self.emy_y = [self.emy1.y, self.emy2.y]  # 敵Y座標リスト
         self.emy_hp = [self.emy1.hp, self.emy2.hp]  # 敵HPリスト
@@ -52,18 +72,15 @@ class App:
         self.emy_flg = [self.emy1.flg, self.emy2.flg]  # 敵出現フラグリスト
         self.emy_dmg = [self.emy1.dmg, self.emy2.dmg]  # 敵ダメージ描画フラグリスト
 
-        self.map_y = -248  # マップY座標
-        self.tmr = 0  # 時間を管理する変数
-
-        pyxel.run(self.update, self.draw)  # 更新処理、描画処理実行
-
     def update(self):  # フレームの更新処理
         self.tmr += 1  # 時間を加算
-
         if self.scene == SCENE_TITLE:  # 画面遷移がタイトル画面の場合
             self.update_title_scene()  # タイトル画面処理更新関数実行
         elif self.scene == SCENE_PLAY:  # 画面遷移がゲーム画面の場合
             self.update_play_scene()  # ゲーム画面更新処理関数実行
+        elif self.scene == SCENE_GAMEOVER:  # 画面遷移がゲームオーバーの場合
+            self.update_gameover_scene()  # ゲームオーバー画面更新処理関数実行
+        if not self.pl.flg and self.tmr == 10: self.scene = SCENE_GAMEOVER  # プレイヤー出現フラグがFalseかつ10秒後にゲームオーバーに画面遷移
 
     def update_title_scene(self):  # タイトル画面更新処理関数
         if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):  # SPACEキーが押された場合
@@ -72,13 +89,20 @@ class App:
     def update_play_scene(self):  # ゲーム画面更新処理関数
         if self.pl.flg: self.move_player()  # プレイヤーを動かす関数実行
 
+    def update_gameover_scene(self):  # ゲームオーバー画面更新処理関数
+        if not self.pl.flg and self.tmr == 20:  # プレイヤー出現フラグがFalseで20秒後
+            self.init()  # 初期化関数実行
+            self.scene = SCENE_TITLE  # タイトル画面へ遷移
+
     def draw(self):  # 描画処理
         pyxel.cls(0)  # 背景を黒で更新(画面クリア)
 
         if self.scene == SCENE_TITLE:  # 画面遷移がタイトル画面の場合
-            draw_title_scene()
+            draw_title_scene()  # タイトル画面描画関数実行
         elif self.scene == SCENE_PLAY:  # 画面遷移がゲーム画面の場合
             self.draw_play_scene()  # ゲーム画面更新処理関数実行
+        elif self.scene == SCENE_GAMEOVER:  # 画面遷移がゲームオーバー画面の場合
+            draw_gameover_scene()  # ゲーム画面更新処理関数実行
 
     def draw_play_scene(self):  # ゲーム画面描画関数
         pyxel.bltm(0, self.map_y, 0, 0, 0, 96, 320)  # タイルマップを描画
@@ -187,6 +211,7 @@ class App:
             self.pl.dmg = True  # ダメージ描画フラグをTrueへ
         if self.pl.hp <= 0:  # プレイヤーHPが0以下の場合
             self.pl.flg = False  # プレイヤー出現フラグをFalseへ
+            self.tmr = 0
 
     def draw_enemyhp(self, en):  # モンスターHP描画関数
         for j in range(9, 0, -1):  # 9～0の範囲を-1減算
