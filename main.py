@@ -32,7 +32,7 @@ def draw_title_scene():  # タイトル画面描画関数
     pyxel.blt(26, 28, 0, 0, 48, 40, 16, 0)  # ロゴ描画
     pyxel.text(33, 45, "8X8Dot", 7)  # タイトル文字描画
     pyxel.text(43, 51, "Quest", 7)  # タイトル文字描画
-    pyxel.text(21, 74, "-PRESS SPACE -", (pyxel.frame_count % 8)+1)  # スタート文字描画
+    pyxel.text(21, 74, "-PRESS SPACE -", (pyxel.frame_count % 8) + 1)  # スタート文字描画
 
 
 class App:
@@ -59,7 +59,6 @@ class App:
 
     def update(self):  # フレームの更新処理
         self.tmr += 1  # 時間を加算
-        # if self.pl.flg: self.move_player()  # プレイヤーを動かす関数実行
 
         if self.scene == SCENE_TITLE:  # 画面遷移がタイトル画面の場合
             self.update_title_scene()  # タイトル画面処理更新関数実行
@@ -67,7 +66,7 @@ class App:
             self.update_play_scene()  # ゲーム画面更新処理関数実行
 
     def update_title_scene(self):  # タイトル画面更新処理関数
-        if pyxel.btnp(pyxel.KEY_SPACE):  # SPACEキーが押された場合
+        if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):  # SPACEキーが押された場合
             self.scene = SCENE_PLAY  # ゲーム画面に遷移
 
     def update_play_scene(self):  # ゲーム画面更新処理関数
@@ -119,7 +118,7 @@ class App:
         l_map = pyxel.tilemap(0).pget(move_map_x - 1, move_map_y)  # プレイヤーの右のマップタイルの判定
         u_map = pyxel.tilemap(0).pget(move_map_x, move_map_y - 1)  # プレイヤーの上のマップタイルの判定
         d_map = pyxel.tilemap(0).pget(move_map_x, move_map_y + 1)  # プレイヤーの下のマップタイルの判定
-        if pyxel.btnp(pyxel.KEY_UP) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):  # 上キーが押された場合
+        if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP):  # 上キーが押された場合
             if u_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.map_y += 8  # マップY座標を加算してスクロール
                 self.pl.dy -= 8  # スクロール用Y座標を減算してスクロール
@@ -129,7 +128,7 @@ class App:
                         self.pl.dy += 8  # スクロール用Y座標を減算してスクロール
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
-        if pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):  # 下キーが押された場合
+        if pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):  # 下キーが押された場合
             if d_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.map_y -= 8  # マップY座標を減算してスクロール
                 self.pl.dy += 8  # スクロール用Y座標を加算してスクロール
@@ -139,7 +138,7 @@ class App:
                         self.pl.dy -= 8  # スクロール用Y座標を加算してスクロール
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
-        if pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):  # 右キーが押された場合
+        if pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):  # 右キーが押された場合
             if r_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.pl.x += 8  # プレイヤーX座標を加算して移動
                 for i in range(len(self.emy_flg)):  # 敵の要素数
@@ -147,7 +146,7 @@ class App:
                         self.pl.x -= 8  # プレイヤーX座標を加算して移動
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
-        if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):  # 左キーが押された場合
+        if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):  # 左キーが押された場合
             if l_map == (0, 2):  # プレイヤーの左のマップタイルの進入禁止判定
                 self.pl.x -= 8  # プレイヤーX座標を減算して移動
                 for i in range(len(self.emy_flg)):  # 敵の要素数
