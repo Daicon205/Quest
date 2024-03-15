@@ -152,7 +152,7 @@ class App:
                         self.pl.dy += 8  # スクロール用Y座標を減算してスクロール
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
-        if pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):  # 下キーが押された場合
+        elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):  # 下キーが押された場合
             if d_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.map_y -= 8  # マップY座標を減算してスクロール
                 self.pl.dy += 8  # スクロール用Y座標を加算してスクロール
@@ -162,7 +162,7 @@ class App:
                         self.pl.dy -= 8  # スクロール用Y座標を加算してスクロール
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
-        if pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):  # 右キーが押された場合
+        elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):  # 右キーが押された場合
             if r_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.pl.x += 8  # プレイヤーX座標を加算して移動
                 for i in range(len(self.emy_flg)):  # 敵の要素数
@@ -170,7 +170,7 @@ class App:
                         self.pl.x -= 8  # プレイヤーX座標を加算して移動
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
-        if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):  # 左キーが押された場合
+        elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):  # 左キーが押された場合
             if l_map == (0, 2):  # プレイヤーの左のマップタイルの進入禁止判定
                 self.pl.x -= 8  # プレイヤーX座標を減算して移動
                 for i in range(len(self.emy_flg)):  # 敵の要素数
