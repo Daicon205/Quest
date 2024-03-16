@@ -16,11 +16,13 @@ class GameCharacter:  # キャラクタークラスの定義
 
 
 class Player(GameCharacter):  # プレイヤークラスを定義
-    def __init__(self, x, y, hp, atk, flg, dmg, dy, atkcnt, dfs):  # コンストラクタ
+    def __init__(self, x, y, hp, atk, flg, dmg, dy, atkcnt, dfs, food, life):  # コンストラクタ
         super().__init__(x, y, hp, atk, flg, dmg)  # 親クラスのコンストラクタを実行
         self.dy = dy  # スクロール用Y座標属性に引数を代入
         self.atkcnt = atkcnt  # 素手攻撃用カウント（3回ダメージで1回攻撃）
         self.dfs = dfs  # 防御属性に引数を代入
+        self.food = food  # 食料属性に引数を代入
+        self.life = life  # ライフ属性に引数を代入
 
 
 class Enemy(GameCharacter):  # モンスタークラスを定義
@@ -42,7 +44,7 @@ def draw_gameover_scene():  # ゲームオーバー画面描画
 
 class App:
     def __init__(self):  # 初回1回のみ実行
-        pyxel.init(96, 96, title="8X8DotQuest", fps=5)  # 画面サイズFPS設定
+        pyxel.init(96, 96, title="8X8DotQuest", fps=8)  # 画面サイズFPS設定
         pyxel.load("Quest.pyxres")  # PyxelEditorの読み込み
         self.scene = SCENE_TITLE  # 画面遷移の初期化
         self.map_y = None  # マップY座標定義
@@ -62,7 +64,7 @@ class App:
     def init(self):  # 初期化関数
         self.map_y = -248  # マップY座標
         self.tmr = 0  # 時間を管理する変数
-        self.pl = Player(8, 48, 10, 10, True, False, 40, 3, 5)  # プレイヤーオブジェクト作成
+        self.pl = Player(8, 48, 10, 10, True, False, 40, 3, 5, 100, 10)  # プレイヤーオブジェクト作成
         self.emy1 = Enemy(56, 272, 10, 1, True, False)  # モンスターオブジェクト作成(スライム：map1）
         self.emy2 = Enemy(72, 272, 10, 1, True, False)  # モンスターオブジェクト作成(スライム：map1）
         self.emy_x = [self.emy1.x, self.emy2.x]  # 敵X座標リスト
@@ -88,6 +90,9 @@ class App:
 
     def update_play_scene(self):  # ゲーム画面更新処理関数
         if self.pl.flg: self.move_player()  # プレイヤーを動かす関数実行
+        if (0, 8) == pyxel.tilemap(0).pget(move_map_x, move_map_y): # プレイヤーのマップ位置が剣タイルチップの場合
+            self.pl.atk += 1    # 攻撃の個数を加算
+            pyxel.tilemap(0).pset(move_map_x, move_map_y, (0, 2))   # 
 
     def update_gameover_scene(self):  # ゲームオーバー画面更新処理関数
         if not self.pl.flg and self.tmr == 20:  # プレイヤー出現フラグがFalseで20秒後
@@ -105,19 +110,21 @@ class App:
             draw_gameover_scene()  # ゲーム画面更新処理関数実行
 
     def draw_play_scene(self):  # ゲーム画面描画関数
+        animation = [1, 1, 0, 0]  # キャラアニメーションリスト
         pyxel.bltm(0, self.map_y, 0, 0, 0, 96, 320)  # タイルマップを描画
         pyxel.blt(self.pl.x, self.pl.y, 0, 40, 0, 8, 8, 0) if not self.pl.flg \
-            else pyxel.blt(self.pl.x, self.pl.y, 0, 8 * (pyxel.frame_count % 2), 0, 8, 8, 11)  # プレイヤー描画
+            else pyxel.blt(self.pl.x, self.pl.y, 0, 8 * animation[self.tmr % 4], 0, 8, 8, 11)  # プレイヤー描画
         if self.pl.dmg and self.pl.flg:  # ダメージ描画フラグ、出現フラグがTrueの場合
-            pyxel.blt(self.pl.x, self.pl.y, 0, 8 * (pyxel.frame_count % 2), 8, 8, 8, 0)  # プレイヤー描画(ダメージ)
+            pyxel.blt(self.pl.x, self.pl.y, 0, 8 * animation[self.tmr % 4], 8, 8, 8, 0)  # プレイヤー描画(ダメージ)
             self.pl.dmg = False  # ダメージ描画フラグをFalseへ
         for i in range(len(self.emy_flg)):  # 敵の要素数
-            if self.emy_flg[i]: pyxel.blt(self.emy_x[i], self.emy_y[i] + self.map_y, 0, 8 * (pyxel.frame_count % 2) + 16, 0, 8, 8, 0)  # スライム描画
+            if self.emy_flg[i]: pyxel.blt(self.emy_x[i], self.emy_y[i] + self.map_y, 0, 8 * animation[self.tmr % 4] + 16, 0, 8, 8, 0)  # スライム描画
         for i in range(len(self.emy_flg)):  # 敵の要素数
             if self.emy_dmg[i]:  # ダメージ描画フラグがTrueの場合
                 pyxel.blt(self.emy_x[i], self.emy_y[i] + self.map_y, 0, 33, 0, 8, 8, 0) if self.emy_hp[i] == 0 \
-                    else pyxel.blt(self.emy_x[i], self.emy_y[i] + self.map_y, 0, 8 * (pyxel.frame_count % 2) + 16, 8, 8, 8, 0)  # スライム描画(ダメージ)
+                    else pyxel.blt(self.emy_x[i], self.emy_y[i] + self.map_y, 0, 8 * animation[self.tmr % 4] + 16, 8, 8, 8, 0)  # スライム描画(ダメージ)
                 self.draw_enemyhp(i)  # モンスターHP描画関数実行
+                # if pyxel.frame_count % 16:
                 self.emy_dmg[i] = False  # ダメージ描画フラグをFalseへ
         pyxel.rect(0, 72, 96, 24, 2)  # 画面下部のステータス部分を描画
         pyxel.rect(1, 73, 94, 22, 0)  # 画面下部のステータス部分を描画
@@ -134,8 +141,15 @@ class App:
         pyxel.blt(27, 80, 0, 16, 24, 8, 8, 0)  # 盾アイコン描画
         d = f" {self.pl.dfs}"  # 盾の数を変数に代入
         pyxel.text(32, 81, d, 7)  # 盾の数をテキスト描画
+        pyxel.blt(51, 80, 0, 48, 16, 8, 8, 0)  # 食料アイコン描画
+        f = f" {self.pl.food}"  # 食事の数を変数に代入
+        pyxel.text(56, 81, f, 7)  # 食事の数をテキスト描画
+        pyxel.blt(75, 80, 0, 24, 24, 8, 8, 0)  # ライフアイコン描画
+        l = f" {self.pl.life}"  # ライフの数を変数に代入
+        pyxel.text(80, 81, l, 7)  # ライフの数をテキスト描画
 
     def move_player(self):  # プレイヤーを動かす関数
+        global move_map_x, move_map_y  # グローバル変数
         move_map_x = int(self.pl.x / 8)  # プレイヤーのマップタイルの位置を計算X座標
         move_map_y = int(self.pl.dy / 8) + 32  # プレイヤーのマップタイルの位置を計算Y座標
         r_map = pyxel.tilemap(0).pget(move_map_x + 1, move_map_y)  # プレイヤーの右のマップタイルの判定
@@ -143,7 +157,7 @@ class App:
         u_map = pyxel.tilemap(0).pget(move_map_x, move_map_y - 1)  # プレイヤーの上のマップタイルの判定
         d_map = pyxel.tilemap(0).pget(move_map_x, move_map_y + 1)  # プレイヤーの下のマップタイルの判定
         if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP):  # 上キーが押された場合
-            if u_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
+            if u_map == (0, 2) or u_map == (0, 8):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.map_y += 8  # マップY座標を加算してスクロール
                 self.pl.dy -= 8  # スクロール用Y座標を減算してスクロール
                 for i in range(len(self.emy_flg)):  # 敵の要素数
@@ -153,7 +167,7 @@ class App:
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
         elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):  # 下キーが押された場合
-            if d_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
+            if d_map == (0, 2) or d_map == (0, 8):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.map_y -= 8  # マップY座標を減算してスクロール
                 self.pl.dy += 8  # スクロール用Y座標を加算してスクロール
                 for i in range(len(self.emy_flg)):  # 敵の要素数
@@ -163,7 +177,7 @@ class App:
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
         elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT):  # 右キーが押された場合
-            if r_map == (0, 2):  # プレイヤーの右のマップタイルの進入禁止判定
+            if r_map == (0, 2) or r_map == (0, 8):  # プレイヤーの右のマップタイルの進入禁止判定
                 self.pl.x += 8  # プレイヤーX座標を加算して移動
                 for i in range(len(self.emy_flg)):  # 敵の要素数
                     if self.check_enemy(i) and self.emy_flg[i]:  # 敵出現フラグがTrueなら敵との接触をチェックする関数実行
@@ -171,7 +185,7 @@ class App:
                         self.attack(i)  # 攻撃関数実行
                         self.defence(i)  # 防御関数実行
         elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):  # 左キーが押された場合
-            if l_map == (0, 2):  # プレイヤーの左のマップタイルの進入禁止判定
+            if l_map == (0, 2) or l_map == (0, 8):  # プレイヤーの左のマップタイルの進入禁止判定
                 self.pl.x -= 8  # プレイヤーX座標を減算して移動
                 for i in range(len(self.emy_flg)):  # 敵の要素数
                     if self.check_enemy(i) and self.emy_flg[i]:  # 敵出現フラグがTrueなら敵との接触をチェックする関数実行
